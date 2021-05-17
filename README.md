@@ -38,20 +38,26 @@
 * [About the Project](#about-the-project)
   * [Minecraft name sniping](#minecraft-name-sniping)
   * [Proprietery name snipers](#proprietery-name-snipers)
-  * [Project aim](#project-aim)
+* [Getting Started](#getting-started)
+  * [Prerequisties](#prerequisties)
+  * [Installation](#installation)
+  * [Usage](#usage)
+* [Roadmap](#roadmap)
+* [Contributing](#contributing)
+* [License](#license)
+* [Notes](#notes)
 
 ## About The Project
-Tango is an asynchornous open-source minecraft name sniper.
+Tango is an asynchornous open-source minecraft name sniper written in Python.
+
+This project's aim is to provide a fast, free, open-source, and trusted alternative to proprietery name snipers.
+The project can be used by both beginners or advanced users. It is OS independent.
 
 ### Minecraft name sniping
 When you change your username in Minecraft, other players can claim the old username after 37 days. Trying to be the first to claim the old username is called name sniping.
 
 ### Proprietery name snipers
 Currently, most name snipers are proprietery. This means that they may use your data (Email and password) maliciously, and they are also paid.
-
-### Project aim
-This project's aim is to provide a fast, free, open-source, and trusted alternative to proprietery name snipers.
-The project can be used by both beginners or advanced users. It is OS independent.
 
 ## Getting Started
 ### Prerequisites
@@ -69,7 +75,10 @@ python3 -m pip install aiohttp
 ```
 
 ### Installation
-First download the project, then open the `interface` folder, finally open the `inteface.py` and you're good to go.
+First download the project from this repository.
+
+### Usage
+Open the `interface` folder, finally open the `inteface.py` and you're good to go.
 
 ## Roadmap
 See the [open issues](https://github.com/Miestrode/tango/issues) for a list issues, features and bug reports.
@@ -86,7 +95,6 @@ You can help this sniper grow. Just follow theres four steps:
 ## License
 Distributed under the GPL-3.0 License. Check out `LICENSE` for a fuller description.
 
-## Acknowledgements
-
+## Notes
 * This project's README uses [Othneil Drew](https://github.com/othneildrew)'s [README template](https://github.com/othneildrew/Best-README-Template)
 * This project was partly inspired by [MCsniperPY](https://github.com/MCsniperPY/MCsniperPY) from [Kqzz](https://github.com/Kqzz).
