@@ -4,6 +4,21 @@ import src.sniper
 import src.error
 
 
+# Display the logo
+print(f"""{src.error.BLUE}{src.error.BOLD}
+88888888888                                  
+    888                                      
+    888                                      
+    888   8888b.  88888b.   .d88b.   .d88b.  
+    888      "88b 888 "88b d88P"88b d88""88b 
+    888  .d888888 888  888 888  888 888  888 
+    888  888  888 888  888 Y88b 888 Y88..88P 
+    888  "Y888888 888  888  "Y88888  "Y88P"  
+{src.error.GRAY}{src.error.BOLD}The open-source name sniper     {src.error.BLUE}{src.error.BOLD}888          
+                           Y8b d88P          
+                            "Y88P"\n""")
+
+
 # Get the maximum latency of an available
 def maximum_mojang_api_latency() -> int:
     """
