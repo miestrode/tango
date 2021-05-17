@@ -1,37 +1,27 @@
-
-[contributors-shield]: https://img.shields.io/github/contributors/Miestrode/tango.svg?style=for-the-badge
-[contributors-url]: https://github.com/Miestrode/tango/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/Miestrode/tango.svg?style=for-the-badge
-[forks-url]: https://github.com/Miestrode/tango/network/members
-[stars-shield]: https://img.shields.io/github/stars/Miestrode/tango.svg?style=for-the-badge
-[stars-url]: https://github.com/Miestrode/tango/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Miestrode/tango.svg?style=for-the-badge
-[issues-url]: https://github.com/Miestrode/tango/issues
-[license-shield]: https://img.shields.io/github/license/Miestrode/tango.svg?style=for-the-badge
-[license-url]: https://github.com/Miestrode/tango/blob/master/LICENSE.txt
-
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![License][license-shield]][license-url]
 <br />
 <p align="center">
   <a href="https://github.com/Miestrode/tango">
     <img src="logo.png" alt="Logo" width="128" height="128">
   </a>
-
   <h1 align="center">Tango</h1>
-
   <p align="center">
     A free, open-source Minecraft name sniper
     <br />
-    <a href="https://github.com/Miestrode/tango/blob/main/README.md">Learn about Tango</a>
-    .
-    <a href="https://github.com/Miestrode/tango/issues">Report a bug</a>
-    ·
-    <a href="https://github.com/Miestrode/tango/issues">Request a feature</a>
+    <a href="https://github.com/Miestrode/tango/blob/main/README.md">Learn about Tango</a> | <a href="https://github.com/Miestrode/tango/issues">Submit an issue</a>
   </p>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Miestrode/tango/graphs/contributors" align="center">
+    <img src="https://img.shields.io/github/contributors/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
+  <a href="https://github.com/Miestrode/tango/network/members" align="center">
+    <img src="https://img.shields.io/github/forks/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
+  <a href="https://github.com/Miestrode/tango/stargazers" align="center">
+    <img src="https://img.shields.io/github/stars/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
+  <a href="https://github.com/Miestrode/tango/issues" align="center">
+    <img src="https://img.shields.io/github/issues/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
+  <a href="https://github.com/Miestrode/tango/blob/master/LICENSE.txt" align="center">
+    <img src="https://img.shields.io/github/license/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
 </p>
 
 ## Table of contents
