@@ -1,5 +1,4 @@
-# A simple way to communicate with the sniper.py file and snipe names, without needing technical knowledge
-import subprocess
+import subprocess  # For pinging the Mojang API
 import src.sniper
 import src.error
 
@@ -14,7 +13,7 @@ print(f"""{src.error.BLUE}{src.error.BOLD}
     888  .d888888 888  888 888  888 888  888 
     888  888  888 888  888 Y88b 888 Y88..88P 
     888  "Y888888 888  888  "Y88888  "Y88P"  
-{src.error.GRAY}{src.error.BOLD}The open-source name sniper     {src.error.BLUE}{src.error.BOLD}888          
+{src.error.GRAY}{src.error.BOLD}An open-source name sniper      {src.error.BLUE}{src.error.BOLD}888          
                            Y8b d88P          
                             "Y88P"\n""")
 
@@ -50,7 +49,7 @@ offset = 0
 
 while True:
     if offset_type == "custom":
-        offset = input(f"{src.error.GRAY}\nWhat offset would you like (in milliseconds)?\n{src.error.BLUE}{src.error.BOLD}> ")
+        offset = input(f"{src.error.GRAY}\nWhat offset should be used (in milliseconds)?\n{src.error.BLUE}{src.error.BOLD}> ")
 
         try:
             offset = float(offset)
@@ -68,8 +67,29 @@ while True:
             print(f"{src.error.DARK_GRAY} Failed to calculate server latency. Defaulting to 0.")
         break
 
+requests = 80
+
+while True:
+    request_preset = input(f"{src.error.GRAY}\nWhat request preset should be used?{src.error.BLUE}{src.error.BOLD}[recommended/custom]\n> ")
+
+    if request_preset in ("recommended", "custom"):
+        break
+
+    print(f"{src.error.GRAY}\nYour input must be \"recommended\", or \"custom\". Try again.")
+
+if request_preset == "custom":
+    while True:
+        requests = input(f"{src.error.GRAY}\nHow many requests should be sent?\n{src.error.BLUE}{src.error.BOLD}> ")
+
+        try:
+            requests = int(requests)
+            break
+        except ValueError:
+            print(f"{src.error.GRAY}\nYour input must be a valid integer. Try again.")
+            continue
+
 print(f"{src.error.LIGHT_BLUE}\nThank you for entering your details. The details will now be verified.")
 
 # Snipe the name
 account = src.sniper.SnipeAccount(username, password)
-account.snipe_username(target_name, offset)
+account.snipe_username(target_name, offset, requests)
