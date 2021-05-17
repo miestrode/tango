@@ -11,21 +11,6 @@ if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())  # If you're using the Windows operating system
 
 
-# Display the logo
-print(f"""{src.error.BLUE}{src.error.BOLD}
-88888888888                                  
-    888                                      
-    888                                      
-    888   8888b.  88888b.   .d88b.   .d88b.  
-    888      "88b 888 "88b d88P"88b d88""88b 
-    888  .d888888 888  888 888  888 888  888 
-    888  888  888 888  888 Y88b 888 Y88..88P 
-    888  "Y888888 888  888  "Y88888  "Y88P"  
-{src.error.GRAY}{src.error.BOLD}The open-source name sniper     {src.error.BLUE}{src.error.BOLD}888          
-                           Y8b d88P          
-                            "Y88P"\n""")
-
-
 async def availability_time(username: str) -> int:
     """
     Sends a request to Teun's API and returns the time of availability of that name
