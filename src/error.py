@@ -1,4 +1,4 @@
-# Errors and displaying them
+# ANSI escape codes for colors
 RED = "\033[0;38;2;199;47;49m"
 DARK_GRAY = "\033[0;38;2;88;88;88m"
 GRAY = "\033[0;38;2;148;148;148m"
@@ -8,17 +8,20 @@ ITALIC = "\033[3m"
 BOLD = "\033[1m"
 
 
+# Base error class
 class Error:
     def __init__(self, error_type, description, details):
         print(f"\n{RED}{error_type.upper()}\n{'=' * len(error_type)}\n{GRAY}{description}\n\n{DARK_GRAY}{ITALIC}{details}")
         exit(1)
 
 
+# An error with authenticating a minecraft account
 class AuthenticationError(Error):
     def __init__(self, description, details):
         super().__init__("AUTHENTICATION ERROR", description, details)
 
 
+# An error with getting the availability time of an account
 class TimingError(Error):
     def __init__(self, description, details):
         super().__init__("TIMING ERROR", description, details)
