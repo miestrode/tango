@@ -61,23 +61,25 @@ Currently, most name snipers are proprietery. This means that they may use your 
 ## Getting Started
 ### Prerequisites
 
-Install Python 3.9 from [here](https://www.python.org/downloads/release/python-395/).
+First install Python 3.9 from [here](https://www.python.org/downloads/release/python-395/).
 
-Then, if you're using Windows:
+Then go to your terminal of choice.
+If you're using Windows, type:
 ```
 py -m pip install aiohttp
 ```
 
-instaed, if you're using Unix/macOS:
+instead, if you're using Unix//macOS, type:
 ```
 python3 -m pip install aiohttp
 ```
 
 ### Installation
-First download the project from this repository.
+Just download the project from (here)[https://github.com/Miestrode/tango/releases].
 
 ### Usage
-Open the `interface` folder, finally open the `inteface.py` and you're good to go.
+First open the `interface` folder, afterwards open the `build_json.py` file.
+Finally open the `main.py` file, and you're good to go.
 
 ## Roadmap
 See the [open issues](https://github.com/Miestrode/tango/issues) for a list issues, features and bug reports.
@@ -86,13 +88,13 @@ See the [open issues](https://github.com/Miestrode/tango/issues) for a list issu
 You can help this sniper grow. Just follow theres four steps:
 
 1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/BiglyFeature`)
-3. Commit your Changes (`git commit -m 'Added a bigly feature'`)
-4. Push to the Branch (`git push origin feature/BiglyFeature`)
+2. Create your Feature Branch
+3. Commit your Changes
+4. Push to the Branch
 5. Open a Pull Request
 
 ## License
-Distributed under the GPL-3.0 License. Check out `LICENSE` for a fuller description.
+Distributed under the GPL-3.0 License. Check out it out (here)[https://github.com/Miestrode/tango/blob/main/LICENSE] for a more detailed description.
 
 ## Notes
 * This project's README uses [Othneil Drew](https://github.com/othneildrew)'s [README template](https://github.com/othneildrew/Best-README-Template)
