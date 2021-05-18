@@ -25,6 +25,10 @@
   <img src="https://img.shields.io/github/issues/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
 </a>
 
+<a href="https://www.python.org" align="center">
+  <img src="https://img.shields.io/badge/Made%20with-Python-1f425f.svg?style=for-the-badge" style="max-width:100%;">
+</a>
+
 ## Table of contents
 * [About the Project](#about-the-project)
   * [Minecraft name sniping](#minecraft-name-sniping)
