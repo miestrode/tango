@@ -24,6 +24,10 @@
   <a href="https://github.com/Miestrode/tango/issues">
     <img src="https://img.shields.io/github/issues/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
   </a>
+  
+  <a href="https://github.com/Miestrode/tango/releases">
+    <img src="https://img.shields.io/github/downloads/Miestrode/tango/total.svg?style=for-the-badge" style="max-width:100%;">
+  </a>
 
   <a href="https://www.python.org">
     <img src="https://img.shields.io/badge/Made%20with-Python-1f425f.svg?style=for-the-badge" style="max-width:100%;">
