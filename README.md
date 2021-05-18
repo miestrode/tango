@@ -17,17 +17,18 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/Miestrode/tango/graphs/contributors" align="center">
-  <img src="https://img.shields.io/github/contributors/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
-</a>
+  <a href="https://github.com/Miestrode/tango/graphs/contributors">
+    <img src="https://img.shields.io/github/contributors/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
+  </a>
 
-<a href="https://github.com/Miestrode/tango/issues" align="center">
-  <img src="https://img.shields.io/github/issues/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
-</a>
+  <a href="https://github.com/Miestrode/tango/issues">
+    <img src="https://img.shields.io/github/issues/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
+  </a>
 
-<a href="https://www.python.org" align="center">
-  <img src="https://img.shields.io/badge/Made%20with-Python-1f425f.svg?style=for-the-badge" style="max-width:100%;">
-</a>
+  <a href="https://www.python.org">
+    <img src="https://img.shields.io/badge/Made%20with-Python-1f425f.svg?style=for-the-badge" style="max-width:100%;">
+  </a>
+</p>
 
 ## Table of contents
 * [About the Project](#about-the-project)
