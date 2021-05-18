@@ -56,7 +56,7 @@ Currently, most name snipers are proprietery. This means that they may use your 
 ## Getting Started
 ### Prerequisites
 
-First install Python 3.9 from [here](https://www.python.org/downloads/release/python-395/).
+First install Python 3.9 from [here](https://www.python.org/downloads/release/python-395).
 
 Then go to your terminal of choice.
 If you're using Windows, type:
@@ -70,7 +70,8 @@ python3 -m pip install aiohttp
 ```
 
 ### Installation
-Just download the project from (here)[https://github.com/Miestrode/tango/releases].
+You can download the project by going to [here](https://github.com/Miestrode/tango) and clicking the green button with the `code` label.
+Then just install the ZIP.
 
 ### Usage
 First open the `interface` folder, afterwards open the `build_json.py` file.
