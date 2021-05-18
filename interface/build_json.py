@@ -64,7 +64,7 @@ def build_config() -> None:
                            Y8b d88P          
                             "Y88P" """)
 
-    print(f"""
+print(f"""
 {src.error.LIGHT_BLUE}Welcome to the json builder. This program will create a configuration file for you.
 
 Note that:{src.error.GRAY}
@@ -79,41 +79,37 @@ You are about to enter {src.error.BOLD}important{src.error.GRAY} credentials.
 You can manually create or modify your configuration file to prevent that.
 """)
 
-    account_count = gather_info("How many accounts would you like to use?", int)
-    accounts = {}
+account_count = gather_info("How many accounts would you like to use?", int)
+accounts = {}
 
-    for index in range(account_count):
-        email = gather_info(f"\nEnter the {to_ordinal(index + 1)} account's email:", str)
+for index in range(account_count):
+    email = gather_info(f"\nEnter the {to_ordinal(index + 1)} account's email:", str)
 
-        if accounts.get(email, None):
-            src.error.ShadowingError("Email already used.", email)
+    if accounts.get(email, None):
+        src.error.ShadowingError("Email already used.", email)
 
-        password = gather_info(f"Enter the {to_ordinal(index + 1)} account's password:", str)
+    password = gather_info(f"Enter the {to_ordinal(index + 1)} account's password:", str)
 
-        answers = []
-        use_security_questions = gather_info(f"Does the {to_ordinal(index + 1)} account have security questions? [True/False]", to_bool)
+    answers = []
+    use_security_questions = gather_info(f"Does the {to_ordinal(index + 1)} account have security questions? [True/False]", to_bool)
 
-        if use_security_questions:
-            for rank in range(2):
-                answer = gather_info(f"Enter the {to_ordinal(index + 1)} account's {to_ordinal(rank + 1)} security answer:", str)
+    if use_security_questions:
+        for rank in range(2):
+            answer = gather_info(f"Enter the {to_ordinal(index + 1)} account's {to_ordinal(rank + 1)} security answer:", str)
 
-                if answer:
-                    answers.append(answer)
-                else:
-                    break
+            if answer:
+                answers.append(answer)
+            else:
+                break
 
-        use_gift_code = gather_info(f"Does the {to_ordinal(index + 1)} account have a profile? [True/False]", to_bool)
-        gift_code = ''
+    has_profile = gather_info(f"Does the {to_ordinal(index + 1)} account have a profile? [True/False]", to_bool)
 
-        if use_gift_code:
-            gift_code = gather_info(f"Enter the {to_ordinal(index + 1)} account's gift-code:", str)
+    accounts[email] = {"password": password, "answers": answers, "profile": has_profile}
 
-        accounts[email] = {"password": password, "answers": answers, "code": gift_code}
+target_name = gather_info("\nEnter the name you want to snipe:", str)
 
-    target_name = gather_info("\nEnter the name you want to snipe:", str)
-
-    with open("../src/config.json", 'w') as file:
-        json.dump({"accounts": accounts, "requests": 6, "offset": 400, "optimize": True, "target": target_name}, file, indent=4)
+with open("../src/config.json", 'w') as file:
+    json.dump({"accounts": accounts, "requests": 6, "offset": 400, "optimize": True, "target": target_name}, file, indent=4)
 
 
 if __name__ == "__main__":
