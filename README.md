@@ -33,7 +33,7 @@
   <img src="https://img.shields.io/github/issues/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
 </a>
 
-<a href="https://github.com/Miestrode/tango/blob/master/LICENSE.txt" align="center">
+<a href="https://github.com/Miestrode/tango/blob/main/LICENSE" align="center">
   <img src="https://img.shields.io/github/license/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
 </a>
 
