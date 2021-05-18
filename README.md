@@ -48,10 +48,9 @@
 * [Notes](#notes)
 
 ## About The Project
-Tango is an asynchornous open-source minecraft name sniper written in Python.
+Tango is a performant, free, and open-source Minecraft name sniper.
 
-This project's aim is to provide a fast, free, open-source, and trusted alternative to proprietery name snipers.
-The project can be used by both beginners or advanced users. It is OS independent.
+This project's aim is to provide a fast, free, open-source, and trusted alternative to proprietery name snipers. It's aimed at users from all skill levels. Beginners or veterans.
 
 ### Minecraft name sniping
 When you change your username in Minecraft, other players can claim the old username after 37 days. Trying to be the first to claim the old username is called name sniping
