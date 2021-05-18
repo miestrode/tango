@@ -21,20 +21,8 @@
   <img src="https://img.shields.io/github/contributors/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
 </a>
 
-<a href="https://github.com/Miestrode/tango/network/members" align="center">
-  <img src="https://img.shields.io/github/forks/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
-</a>
-
-<a href="https://github.com/Miestrode/tango/stargazers" align="center">
-  <img src="https://img.shields.io/github/stars/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
-</a>
-
 <a href="https://github.com/Miestrode/tango/issues" align="center">
   <img src="https://img.shields.io/github/issues/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
-</a>
-
-<a href="https://github.com/Miestrode/tango/blob/main/LICENSE" align="center">
-  <img src="https://img.shields.io/github/license/Miestrode/tango.svg?style=for-the-badge" style="max-width:100%;">
 </a>
 
 ## Table of contents
