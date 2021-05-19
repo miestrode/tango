@@ -51,7 +51,8 @@ This project's aim is to provide a fast, free, open-source, and trusted alternat
 ### Minecraft name sniping
 When you change your username in Minecraft, other players can claim the old username after 37 days. Trying to be the first to claim the old username is called name sniping
 ### Proprietery name snipers
-Currently, most name snipers are proprietery. This means that they may use your data (Email and password) maliciously, and they are also paid.
+Currently, most name snipers are proprietery. Because of that they may use your data maliciously.
+Most of them are also paid, cannot be learned from, and don't accept contributions.
 
 ## Getting Started
 ### Prerequisites
@@ -64,7 +65,7 @@ If you're using Windows, type:
 py -m pip install aiohttp
 ```
 
-instead, if you're using Unix//macOS, type:
+instead, if you're using Unix/macOS, type:
 ```
 python3 -m pip install aiohttp
 ```
