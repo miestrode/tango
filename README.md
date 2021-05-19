@@ -91,7 +91,7 @@ You can help this sniper grow. Just follow theres four steps:
 5. Open a Pull Request
 
 ## License
-Distributed under the GPL-3.0 License. Check out it out [here](https://github.com/Miestrode/tango/blob/main/LICENSE) for a more detailed description.
+The project is distributed under the GPL-3.0 License. Check out it out [here](https://github.com/Miestrode/tango/blob/main/LICENSE) for a more detailed description.
 
 ## Notes
 * This project's README uses [Othneil Drew](https://github.com/othneildrew)'s [README template](https://github.com/othneildrew/Best-README-Template)
