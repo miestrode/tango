@@ -26,7 +26,7 @@ async def availability_time(username: str) -> int:
     :return: The amount of seconds until the specified name is available
     """
 
-    # Teun's API can get name drop times, as this is impossible since Mojang disabled the use of the "timestamp" parameter since 2020
+    # Teun's API can get name drop times, as this is impossible with the Mojang API since Mojang disabled the use of the "timestamp" parameter since 2020
     async with SESSION.session.get(f"https://mojang-api.teun.lol/droptime/{username}") as drop_time_response:
         if drop_time_response.status != 200:
             # Unfortunately, the API doesn't distinguish between available and unavailable names. So we have to send a second call to the Mojang API
