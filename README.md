@@ -9,7 +9,7 @@
 </h1>
 
 <p align="center">
-  A free, open-source Minecraft name sniper
+  An optimized, user-friendly Minecraft name sniper
 </p>
 
 <p align="center">
