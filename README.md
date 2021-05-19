@@ -79,7 +79,7 @@ First open the `interface` folder, afterwards open the `build_json.py` file.
 Finally open the `main.py` file, and you're good to go.
 
 ## Roadmap
-See the [open issues](https://github.com/Miestrode/tango/issues) for a list issues, features and bug reports.
+View the [issues and pull requests](https://github.com/Miestrode/tango/issues) for a list of issues, features and bug reports.
 
 ## Contributing
 You can help this sniper grow. Just follow theres four steps:
