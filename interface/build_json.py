@@ -109,7 +109,7 @@ for index in range(account_count):
 target_name = gather_info("\nEnter the name you want to snipe:", str)
 
 with open("../src/config.json", 'w') as file:
-    json.dump({"accounts": accounts, "requests": 6, "offset": 400, "optimize": True, "target": target_name}, file, indent=4)
+    json.dump({"accounts": accounts, "requests": 3, "offset": 400, "optimize": True, "target": target_name}, file, indent=4)
 
 
 if __name__ == "__main__":
