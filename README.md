@@ -75,8 +75,14 @@ You can download the project by going to [here](https://github.com/Miestrode/tan
 Then just install the ZIP.
 
 ### Usage
-First open the `interface` folder, afterwards open the `build_json.py` file.
-Finally open the `main.py` file, and you're good to go.
+You can start using Tango by following these steps:
+* Open the `interface` folder
+* Run `build_json.py`
+* Run `main.py`
+
+`build_json.py` Creates your configuration file for the first time, but it can be used again.
+`main.py` Uses the `src` files to run a sniping session with the data from your configuration file.
+It is advised to have a configuration file before running `main.py`, although you don't have to.
 
 ## Roadmap
 View the [issues and pull requests](https://github.com/Miestrode/tango/issues) for a list of issues, features and bug reports.
