@@ -80,13 +80,15 @@ You can manually create or modify your configuration file to prevent that.
 """)
 
 account_count = gather_info("How many accounts would you like to use?", int)
+
+if account_count > 1:
+    print(f"{src.error.LIGHT_BLUE}Note: {src.error.GRAY}Mojang currently rate-limits requests per IP.\n"
+    "Using multiple accounts is not recommended unless you can use a VPS (Virtual private server).")
+
 accounts = {}
 
 for index in range(account_count):
     email = gather_info(f"\nEnter the {to_ordinal(index + 1)} account's email:", str)
-
-    if accounts.get(email, None):
-        src.error.ShadowingError("Email already used.", email)
 
     password = gather_info(f"Enter the {to_ordinal(index + 1)} account's password:", str)
 
