@@ -72,13 +72,11 @@ Then just install the ZIP.
 
 ### Usage
 You can start using Tango by following these steps:
-* Open the `tango` folder
-* Open the `interface` folder
 * Run `build_json.py`
 * Run `main.py`
 
 `build_json.py` Creates your configuration file for the first time, but it can be used again.
-`main.py` Uses the `src` files to run a sniping session with the data from your configuration file.
+`main.py` Uses `sniper.py` to run a sniping session with the data from your configuration file.
 It is advised to have a configuration file before running `main.py`, although you don't have to.
 
 ## Roadmap
