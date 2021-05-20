@@ -72,6 +72,7 @@ Then just install the ZIP.
 
 ### Usage
 You can start using Tango by following these steps:
+* Open the `tango` folder
 * Open the `interface` folder
 * Run `build_json.py`
 * Run `main.py`
