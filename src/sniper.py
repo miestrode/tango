@@ -174,7 +174,8 @@ class Session:
 
         request_times = asyncio.run(asyncio.gather(*([account.send_snipe_request(self.target_name) for _ in range(self.requests) for account in self.accounts])))
 
-        # As MCsniperPY showed, the best case scenario is for your last request to occur at the names availability time + 0.1 seconds. We adjust for that
+        # Generally a good case scenario is for your last request to occur at the names availability time + 0.1 seconds.
+        # This code automatically adjusts your offset so that you're closer to that "perfect" offset
         new_offset = self.offset - (request_times[-1] - (start_time + datetime.timedelta(milliseconds=100)))
 
         # Directly change the offset in the configuration file
