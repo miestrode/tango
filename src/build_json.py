@@ -11,6 +11,10 @@ def to_bool(to_convert: str) -> bool:
     :param to_convert: A value to convert into a boolean
     :return: A boolean, based on the original value
     """
+
+    if to_convert not in ("True", "False"):
+        raise ValueError(f"invalid literal for bool(): '{to_convert}'")
+
     return to_convert == "True"
 
 
@@ -23,7 +27,7 @@ def gather_info(prompt: str, requested_type: typing.Callable) -> any:
     :return: A response from the user
     """
 
-    response = input(f"{error.GRAY}{prompt}{error.BLUE}{error.BOLD}\n> ")
+    response = input(f"{error.GRAY}{prompt}{error.BLUE}\n> ")
 
     try:
         return requested_type(response)
@@ -46,71 +50,64 @@ def to_ordinal(number: int) -> str:
     return str(number) + suffix
 
 
+def print_logo() -> None:
+    """
+    Print the Tango logo
+    """
+    print(f"""{error.WHITE} 88                                            
+888                                            
+888                                            
+888888  8888b.   88888b.    .d88b.    .d88b.      
+888        "88b  888 "88b  d88P"88b  d88""88b     
+888    .d888888  888  888  888  888  888  888     
+Y88b.  888  888  888  888  Y88b 888  Y88..88P  d8b 
+ "Y888 "Y888888  888  888   "Y88888   "Y88P"   Y8P 
+                                888              
+                           Y8b d88P              
+                            "Y88P"               """)
+
+
 def build_config() -> None:
     """
     Build the configuration file so sessions can be performed
     """
-    # Display the logo
-    print(f"""{error.BLUE}{error.BOLD}
-88888888888                                  
-    888                                      
-    888                                      
-    888   8888b.  88888b.   .d88b.   .d88b.  
-    888      "88b 888 "88b d88P"88b d88""88b 
-    888  .d888888 888  888 888  888 888  888 
-    888  888  888 888  888 Y88b 888 Y88..88P 
-    888  "Y888888 888  888  "Y88888  "Y88P"  
-{error.GRAY}{error.BOLD}An open-source name sniper      {error.BLUE}{error.BOLD}888          
-                           Y8b d88P          
-                            "Y88P" """)
-
-
-print(f"""
+    print(f"""
 {error.LIGHT_BLUE}Welcome to the json builder. This program will create a configuration file for you.
 
 Note that:{error.GRAY}
 
 {error.LIGHT_BLUE}*{error.GRAY} Your sniping offset is gradually changed every snipe to better adapt to your computer.
 Using this program will overwrite the current offset value.
-
-{error.LIGHT_BLUE}*{error.GRAY} You should make sure no one is watching you.
-You are about to enter {error.BOLD}important{error.GRAY} credentials.
-
+{error.LIGHT_BLUE}*{error.GRAY} Make sure no one is watching.
+You are about to enter {error.LIGHT_RED}sensitive{error.GRAY} information.
 {error.LIGHT_BLUE}*{error.GRAY} Some configuration settings are not filled out here, and are set to default values.
 You can manually create or modify your configuration file to prevent that.
 """)
 
-account_count = gather_info("How many accounts would you like to use?", int)
-accounts = {}
+    account_count = gather_info("How many accounts would you like to use?", int)
+    accounts = []
 
-for index in range(account_count):
-    email = gather_info(f"\nEnter the {to_ordinal(index + 1)} account's email:", str)
+    for index in range(account_count):
+        email = gather_info(f"\nEnter the {to_ordinal(index + 1)} account's email:", str)
 
-    if accounts.get(email, None):
-        error.ShadowingError("Email already used.", email)
+        password = gather_info(f"Enter the {to_ordinal(index + 1)} account's password:", str)
 
-    password = gather_info(f"Enter the {to_ordinal(index + 1)} account's password:", str)
+        answers = None
+        use_security_questions = gather_info(f"Does the {to_ordinal(index + 1)} account have security questions? [True/False]", to_bool)
 
-    answers = []
-    use_security_questions = gather_info(f"Does the {to_ordinal(index + 1)} account have security questions? [True/False]", to_bool)
+        if use_security_questions:
+            answers = [gather_info(f"Enter the {to_ordinal(index + 1)} account's {to_ordinal(rank + 1)} security answer:", str) for rank in range(2)]
 
-    if use_security_questions:
-        for rank in range(2):
-            answer = gather_info(f"Enter the {to_ordinal(index + 1)} account's {to_ordinal(rank + 1)} security answer:", str)
+        has_profile = gather_info(f"Does the {to_ordinal(index + 1)} account have a profile? [True/False]", to_bool)
 
-            if answer:
-                answers.append(answer)
-            else:
-                break
+        accounts.append({"email": email, "password": password, "answers": answers, "profile": has_profile})
 
-    has_profile = gather_info(f"Does the {to_ordinal(index + 1)} account have a profile? [True/False]", to_bool)
+    target_name = gather_info("\nEnter the name you want to snipe:", str)
 
-    accounts[email] = {"password": password, "answers": answers, "profile": has_profile}
+    with open("../src/config.json", 'w') as file:
+        json.dump({"accounts": accounts, "requests": 3, "offset": 400, "optimize": True, "target": target_name}, file, indent=4)
 
-target_name = gather_info("\nEnter the name you want to snipe:", str)
-
-with open("../src/config.json", 'w') as file:
-    json.dump({"accounts": accounts, "requests": 3, "offset": 400, "optimize": True, "target": target_name}, file, indent=4)
 
 if __name__ == "__main__":
+    print_logo()
     build_config()

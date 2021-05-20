@@ -7,16 +7,10 @@ import aiohttp  # For asynchronous requests
 import time
 import platform
 
+
 # Compatibility with windows
 if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-
-async def create_client_session():
-    return aiohttp.ClientSession()
-
-
-SESSION = asyncio.run(create_client_session())
 
 
 async def availability_time(username: str) -> int:
@@ -27,17 +21,18 @@ async def availability_time(username: str) -> int:
     :return: The amount of seconds until the specified name is available
     """
 
-    # Teun's API can get name drop times, as this is impossible since Mojang disabled the use of the "timestamp" parameter since 2020
-    async with SESSION.session.get(f"https://mojang-api.teun.lol/droptime/{username}") as drop_time_response:
-        if drop_time_response.status != 200:
-            # Unfortunately, the API doesn't distinguish between available and unavailable names. So we have to send a second call to the Mojang API
-            async with SESSION.session.get(f"https://account.mojang.com/available/minecraft/{username}") as availability_response:
-                if await availability_response.text() == "TAKEN":
-                    error.UsernameUnavailableError(await availability_response.text())
+    async with aiohttp.ClientSession() as session:
+        # Teun's API can get name drop times, as this is impossible since Mojang disabled the use of the "timestamp" parameter since 2020
+        async with session.get(f"https://mojang-api.teun.lol/droptime/{username}") as drop_time_response:
+            if drop_time_response.status != 200:
+                # Unfortunately, the API doesn't distinguish between available and unavailable names. So we have to send a second call to the Mojang API
+                async with session.get(f"https://account.mojang.com/available/minecraft/{username}") as availability_response:
+                    if await availability_response.text() == "TAKEN":
+                        error.UsernameUnavailableError(await availability_response.text())
 
-            return 0  # The name is available, so it's "available" in 0 seconds
+                return 0  # The name is available, so it's "available" in 0 seconds
 
-        return (await drop_time_response.json())["UNIX"] - time.time()
+            return (await drop_time_response.json())["UNIX"] - time.time()
 
 
 class Account:
@@ -56,34 +51,35 @@ class Account:
         """
         Authenticate this account, to access restricted parts of the Mojang API
         """
-        async with SESSION.session.post("https://authserver.mojang.com/authenticate", headers={"Content-Type": "application/json"},
-                                        json={"username": self.email, "password": self.password}) as authentication_response:
-            # Only feasible response code is 403 or 200
-            if authentication_response.status != 200:
-                error.InvalidCredentialsError(await authentication_response.text())
+        async with aiohttp.ClientSession() as session:
+            async with session.post("https://authserver.mojang.com/authenticate", headers={"Content-Type": "application/json"},
+                                    json={"username": self.email, "password": self.password}) as authentication_response:
+                # Only feasible response code is 403 or 200
+                if authentication_response.status != 200:
+                    error.InvalidCredentialsError(await authentication_response.text())
 
-            print(f"{error.LIGHT_BLUE}Email and password confirmed, {self.email} exists.")
+                print(f"{error.LIGHT_BLUE}Email and password confirmed, {self.email} exists.")
 
-            access_token = (await authentication_response.json())['accessToken']
-            self.authorization_header = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json", "Accept": "application/json"}
+                access_token = (await authentication_response.json())['accessToken']
+                self.authorization_header = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json", "Accept": "application/json"}
 
-            # Check if you need security questions
-            async with SESSION.session.get("https://api.mojang.com/user/security/location", headers=self.authorization_header) as security_response:
-                if security_response.status != 204:
-                    # Get the security questions
-                    async with SESSION.session.get("https://api.mojang.com/user/security/challenges", headers=self.authorization_header) as question_response:
-                        response_json = await question_response.json()
-                        questions = {question["answer"]["id"]: question["question"]["question"] for question in response_json}
+                # Check if you need security questions
+                async with session.get("https://api.mojang.com/user/security/location", headers=self.authorization_header) as security_response:
+                    if security_response.status != 204:
+                        # Get the security questions
+                        async with session.get("https://api.mojang.com/user/security/challenges", headers=self.authorization_header) as question_response:
+                            response_json = await question_response.json()
+                            questions = {question["answer"]["id"]: question["question"]["question"] for question in response_json}
 
-                        print(f"{error.LIGHT_BLUE}In order to finish authenticating {self.email} you need to answer 3 security questions. Please do so.")
+                            print(f"{error.LIGHT_BLUE}In order to finish authenticating {self.email} you need to answer 3 security questions. Please do so.")
 
-                        # Retrieve answers supplied by the user
-                        answers = [{"id": key, "answer": input(f"\n{error.GRAY}{questions[key]}\n{error.DARK_GRAY}> ")} for key in questions]
+                            # Retrieve answers supplied by the user
+                            answers = [{"id": key, "answer": input(f"\n{error.GRAY}{questions[key]}\n{error.DARK_GRAY}> ")} for key in questions]
 
-                        # Send the answers back
-                        async with SESSION.session.post("https://api.mojang.com/user/security/location", headers=self.authorization_header, json=answers) as answer_response:
-                            if answer_response.status != 204:
-                                error.SecurityAnswerError(await answer_response.text())
+                            # Send the answers back
+                            async with session.post("https://api.mojang.com/user/security/location", headers=self.authorization_header, json=answers) as answer_response:
+                                if answer_response.status != 204:
+                                    error.SecurityAnswerError(await answer_response.text())
 
     async def send_snipe_request(self, target_name: str) -> datetime.datetime:
         """
@@ -94,17 +90,18 @@ class Account:
         current_time = datetime.datetime.now()
 
         # Send a request to change the account's name
-        async with SESSION.session.put(f"https://api.minecraftservices.com/minecraft/profile/name/{target_name}", headers=self.authorization_header) as name_change_response:
-            if name_change_response.status == 200:
-                asyncio.get_event_loop().close()
-                self.got_name = True
-                print(f"{error.BLUE}Succeeded{error.GRAY} in sniping the name {target_name} to {self.email} at {datetime.datetime.now()}.")
-            else:
-                print(f"{error.RED}Failed{error.GRAY} in sniping the name {target_name} to {self.email} at {datetime.datetime.now()}.")
+        async with aiohttp.ClientSession() as session:
+            async with session.put(f"https://api.minecraftservices.com/minecraft/profile/name/{target_name}", headers=self.authorization_header) as name_change_response:
+                if name_change_response.status == 200:
+                    asyncio.get_event_loop().close()
+                    self.got_name = True
+                    print(f"{error.BLUE}Succeeded{error.GRAY} in sniping the name {target_name} to {self.email} at {datetime.datetime.now()}.")
+                else:
+                    print(f"{error.RED}Failed{error.GRAY} in sniping the name {target_name} to {self.email} at {datetime.datetime.now()}.")
 
-        await asyncio.sleep(0)  # Pass control
+            await asyncio.sleep(0)  # Pass control
 
-        return current_time
+            return current_time
 
 
 class GiftCodeAccount(Account):
@@ -127,18 +124,19 @@ class GiftCodeAccount(Account):
         current_time = datetime.datetime.now()
 
         # Send a request to change the account's name
-        async with SESSION.session.post(f"https://api.minecraftservices.com/minecraft/profile", headers=self.authorization_header,
-                                        json={"profileName": target_name}) as claim_response:
-            if claim_response.status == 200:
-                asyncio.get_event_loop().close()
-                self.got_name = True
-                print(f"{error.BLUE}Succeeded{error.GRAY} in claiming the name {target_name} to {self.email} at {datetime.datetime.now()}.")
-            else:
-                print(f"{error.RED}Failed{error.GRAY} in claiming the name {target_name} to {self.email} at {datetime.datetime.now()}.")
+        async with aiohttp.ClientSession() as session:
+            async with session.post(f"https://api.minecraftservices.com/minecraft/profile", headers=self.authorization_header,
+                                    json={"profileName": target_name}) as claim_response:
+                if claim_response.status == 200:
+                    asyncio.get_event_loop().close()
+                    self.got_name = True
+                    print(f"{error.BLUE}Succeeded{error.GRAY} in claiming the name {target_name} to {self.email} at {datetime.datetime.now()}.")
+                else:
+                    print(f"{error.RED}Failed{error.GRAY} in claiming the name {target_name} to {self.email} at {datetime.datetime.now()}.")
 
-        await asyncio.sleep(0)  # Pass control
+            await asyncio.sleep(0)  # Pass control
 
-        return current_time
+            return current_time
 
 
 class Session:
@@ -162,9 +160,12 @@ class Session:
         """
         Change the name of this account to the target name when possible
         """
+        requests = [account.send_snipe_request(self.target_name) for _ in range(self.requests) for account in self.accounts]
         sleep_time = asyncio.run(availability_time(self.target_name)) - self.offset / 1000  # The offset is in milliseconds, so we convert it to seconds
+
         current_time = datetime.datetime.now()
         current_time.replace(microsecond=0)
+
         start_time = current_time + datetime.timedelta(seconds=sleep_time)
 
         print(f"{error.GRAY}\nSniping session began at {error.BLUE}{current_time.strftime('%Y/%m/%d %H:%M:%S')}{error.GRAY}.")
@@ -173,9 +174,9 @@ class Session:
         asyncio.run(asyncio.sleep(sleep_time))
         print(f"{error.GRAY}Sniping started.")
 
-        request_times = asyncio.run(asyncio.gather(*([account.send_snipe_request(self.target_name) for _ in range(self.requests) for account in self.accounts])))
+        request_times = asyncio.run(asyncio.gather(*requests))
 
-        # As MCsniperPY showed, the best case scenario is for your last request to occur at the names availability time + 0.1 seconds. We adjust for that
+        # Generally, a good scenario is for your last request to occur at the names availability time + 0.1 seconds. We attempt to make the offset fall in that range
         new_offset = self.offset - (request_times[-1] - (start_time + datetime.timedelta(milliseconds=100)))
 
         # Directly change the offset in the configuration file
@@ -184,6 +185,3 @@ class Session:
             configuration_json["offset"] = new_offset
 
             json.dump(configuration_json, file, indent=4)
-
-
-asyncio.run(SESSION.close())
