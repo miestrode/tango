@@ -4,10 +4,6 @@
   </a>
 </p>
 
-<h1 align="center">
-  Tango
-</h1>
-
 <p align="center">
   An optimized, user-friendly Minecraft name sniper
 </p>
