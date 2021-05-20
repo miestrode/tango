@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/Miestrode/tango/blob/main/README.md">Learn about Tango</a> | <a href="https://github.com/Miestrode/tango/issues">Submit an issue</a>
+<a href="https://discord.gg/D5V3CzgtZk">Join the discord</a> | <a href="https://github.com/Miestrode/tango/issues">Submit an issue</a>
 </p>
 
 <p align="center">
@@ -37,6 +37,7 @@
 * [Roadmap](#roadmap)
 * [Contributing](#contributing)
 * [License](#license)
+* [Discord](#discord)
 * [Notes](#notes)
 
 ## About The Project
@@ -93,6 +94,9 @@ You can help this sniper grow. Just follow theres four steps:
 
 ## License
 The project is distributed under the GPL-3.0 License. Check it out [here](https://github.com/Miestrode/tango/blob/main/LICENSE) for a more detailed description.
+
+## Discord
+You can join the official Tango discord server by clicking [here](https://discord.gg/D5V3CzgtZk).
 
 ## Notes
 * This project's README uses [Othneil Drew](https://github.com/othneildrew)'s [README template](https://github.com/othneildrew/Best-README-Template)
