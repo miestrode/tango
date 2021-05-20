@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/Miestrode/tango">
-    <img src="images/tango_full_logo.png" width="200" height="50">
+    <img src="images/tango_full_logo.png" width="199" height="71">
   </a>
 </p>
 
