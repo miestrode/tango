@@ -106,14 +106,8 @@ You can manually create or modify your configuration file to prevent that.
 
     target_name = gather_info("\nEnter the name you want to snipe:", str)
 
-    start = datetime.datetime.now()
-    requests.get("https://api.minecraftservices.com/")
-    end = datetime.datetime.now()
-
-    offset = (end - start).total_seconds() * 1000
-
     with open("../src/config.json", 'w') as file:
-        json.dump({"accounts": accounts, "requests": 3, "offset": offset, "optimize": True, "target": target_name}, file, indent=4)
+        json.dump({"accounts": accounts, "requests": 3, "offset": 400, "optimize": True, "target": target_name}, file, indent=4)
 
 
 if __name__ == "__main__":
