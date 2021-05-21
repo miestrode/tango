@@ -1,10 +1,12 @@
 import error
 
+import datetime
+import requests
 import json
 import typing
 
 
-def to_bool(to_convert: str) -> bool:
+def choice(to_convert: str) -> bool:
     """
     Custom "bool()" like implementation for info gathering
 
@@ -12,10 +14,10 @@ def to_bool(to_convert: str) -> bool:
     :return: A boolean, based on the original value
     """
 
-    if to_convert not in ("True", "False"):
-        raise ValueError(f"invalid literal for bool(): '{to_convert}'")
+    if to_convert not in ("Yes", "No"):
+        raise ValueError(f"invalid literal for choice(): '{to_convert}'")
 
-    return to_convert == "True"
+    return to_convert == "Yes"
 
 
 def gather_info(prompt: str, requested_type: typing.Callable) -> any:
@@ -93,19 +95,25 @@ You can manually create or modify your configuration file to prevent that.
         password = gather_info(f"Enter the {to_ordinal(index + 1)} account's password:", str)
 
         answers = None
-        use_security_questions = gather_info(f"Does the {to_ordinal(index + 1)} account have security questions? [True/False]", to_bool)
+        use_security_questions = gather_info(f"Does the {to_ordinal(index + 1)} account have security questions? [Yes/No]", choice)
 
         if use_security_questions:
             answers = [gather_info(f"Enter the {to_ordinal(index + 1)} account's {to_ordinal(rank + 1)} security answer:", str) for rank in range(2)]
 
-        has_profile = gather_info(f"Does the {to_ordinal(index + 1)} account have a profile? [True/False]", to_bool)
+        has_profile = gather_info(f"Does the {to_ordinal(index + 1)} account have a profile? [Yes/No]", choice)
 
         accounts.append({"email": email, "password": password, "answers": answers, "profile": has_profile})
 
     target_name = gather_info("\nEnter the name you want to snipe:", str)
 
+    start = datetime.datetime.now()
+    requests.get("https://api.minecraftservices.com/")
+    end = datetime.datetime.now()
+
+    offset = (end - start).total_seconds() * 1000
+
     with open("../src/config.json", 'w') as file:
-        json.dump({"accounts": accounts, "requests": 3, "offset": 400, "optimize": True, "target": target_name}, file, indent=4)
+        json.dump({"accounts": accounts, "requests": 3, "offset": offset, "optimize": True, "target": target_name}, file, indent=4)
 
 
 if __name__ == "__main__":

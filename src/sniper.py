@@ -93,11 +93,10 @@ class Account:
         async with aiohttp.ClientSession() as session:
             async with session.put(f"https://api.minecraftservices.com/minecraft/profile/name/{target_name}", headers=self.authorization_header) as name_change_response:
                 if name_change_response.status == 200:
-                    asyncio.get_event_loop().close()
                     self.got_name = True
-                    print(f"{error.BLUE}Succeeded{error.GRAY} in sniping the name {target_name} to {self.email} at {datetime.datetime.now()}.")
+                    print(f"{error.BLUE}Succeeded{error.GRAY} in sniping {error.BLUE}{target_name}{error.GRAY} to {error.RED}{self.email}{error.GRAY} at {datetime.datetime.now()}.")
                 else:
-                    print(f"{error.RED}Failed{error.GRAY} in sniping the name {target_name} to {self.email} at {datetime.datetime.now()}.")
+                    print(f"{error.RED}Failed{error.GRAY} in sniping {error.RED}{target_name}{error.GRAY} to {error.RED}{self.email}{error.GRAY} at {datetime.datetime.now()}.")
 
             await asyncio.sleep(0)  # Pass control
 
@@ -128,11 +127,10 @@ class GiftCodeAccount(Account):
             async with session.post(f"https://api.minecraftservices.com/minecraft/profile", headers=self.authorization_header,
                                     json={"profileName": target_name}) as claim_response:
                 if claim_response.status == 200:
-                    asyncio.get_event_loop().close()
                     self.got_name = True
-                    print(f"{error.BLUE}Succeeded{error.GRAY} in claiming the name {target_name} to {self.email} at {datetime.datetime.now()}.")
+                    print(f"{error.BLUE}Succeeded{error.GRAY} in sniping {error.BLUE}{target_name}{error.GRAY} to {error.RED}{self.email}{error.GRAY} at {datetime.datetime.now()}.")
                 else:
-                    print(f"{error.RED}Failed{error.GRAY} in claiming the name {target_name} to {self.email} at {datetime.datetime.now()}.")
+                    print(f"{error.RED}Failed{error.GRAY} in sniping {error.RED}{target_name}{error.GRAY} to {error.RED}{self.email}{error.GRAY} at {datetime.datetime.now()}.")
 
             await asyncio.sleep(0)  # Pass control
 
@@ -156,32 +154,31 @@ class Session:
         self.requests = requests
         self.optimize_offset = optimize_offset
 
-    def run(self) -> None:
+    async def run(self) -> None:
         """
         Change the name of this account to the target name when possible
         """
         requests = [account.send_snipe_request(self.target_name) for _ in range(self.requests) for account in self.accounts]
-        sleep_time = asyncio.run(availability_time(self.target_name)) - self.offset / 1000  # The offset is in milliseconds, so we convert it to seconds
+        sleep_time = max(await availability_time(self.target_name) - self.offset / 1000, 0)  # The offset is in milliseconds, so we convert it to seconds
 
-        current_time = datetime.datetime.now()
-        current_time.replace(microsecond=0)
-
+        current_time = datetime.datetime.fromtimestamp(int(datetime.datetime.now().timestamp()))
         start_time = current_time + datetime.timedelta(seconds=sleep_time)
 
         print(f"{error.GRAY}\nSniping session began at {error.BLUE}{current_time.strftime('%Y/%m/%d %H:%M:%S')}{error.GRAY}.")
         print(f"{error.GRAY}Attempts to snipe {error.BLUE}{self.target_name}{error.GRAY} will begin at {error.BLUE}{start_time.strftime('%Y/%m/%d %H:%M:%S')}{error.GRAY}.")
 
-        asyncio.run(asyncio.sleep(sleep_time))
-        print(f"{error.GRAY}Sniping started.")
+        await asyncio.sleep(sleep_time)
+        print(f"{error.GRAY}Sniping started.\n")
 
-        request_times = asyncio.run(asyncio.gather(*requests))
+        request_times = await asyncio.gather(*requests)
 
         # Generally, a good scenario is for your last request to occur at the names availability time + 0.1 seconds. We attempt to make the offset fall in that range
-        new_offset = self.offset - (request_times[-1] - (start_time + datetime.timedelta(milliseconds=100)))
+        new_offset = max(self.offset + (request_times[-1] - (start_time + datetime.timedelta(milliseconds=100))).microseconds / 1000, 0)
 
         # Directly change the offset in the configuration file
-        with open("/config.json", "w+") as file:
+        with open("../src/config.json", 'r') as file:
             configuration_json = json.loads(file.read())
             configuration_json["offset"] = new_offset
 
+        with open("../src/config.json", 'w') as file:
             json.dump(configuration_json, file, indent=4)
