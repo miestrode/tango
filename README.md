@@ -60,11 +60,13 @@ Then go to your terminal of choice.
 If you're using Windows, type:
 ```
 py -m pip install aiohttp
+py -m pip install colorama
 ```
 
 instead, if you're using Unix/macOS, type:
 ```
 python3 -m pip install aiohttp
+py -m pip install colorama
 ```
 
 ### Installation
