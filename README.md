@@ -56,17 +56,15 @@ Most of them are also paid, cannot be learned from, and don't accept contributio
 
 First install Python 3.9 from [here](https://www.python.org/downloads/release/python-395).
 
-Then go to your terminal of choice.
+Then go to your terminal of choice. We can now being to install the dependencies.
 If you're using Windows, type:
 ```
-py -m pip install aiohttp
-py -m pip install colorama
+py -m pip install aiohttp, colorama, bs4
 ```
 
 instead, if you're using Unix/macOS, type:
 ```
-python3 -m pip install aiohttp
-py -m pip install colorama
+python3 -m pip install aiohttp, colorama, bs4
 ```
 
 ### Installation
