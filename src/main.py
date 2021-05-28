@@ -36,3 +36,4 @@ for account in configuration_json["accounts"]:
 
 sniping_session = sniper.Session(accounts, configuration_json["target"], configuration_json["offset"], configuration_json["requests"], configuration_json["optimize"])
 asyncio.run(sniping_session.run())
+input(f"{error.GRAY}\nSniping session ended. Press {error.LIGHT_BLUE}Enter{error.GRAY} to exit.")

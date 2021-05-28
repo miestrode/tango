@@ -1,7 +1,5 @@
 import error
 
-import datetime
-import requests
 import json
 import typing
 
@@ -91,7 +89,6 @@ You can manually create or modify your configuration file to prevent that.
 
     for index in range(account_count):
         email = gather_info(f"\nEnter the {to_ordinal(index + 1)} account's email:", str)
-
         password = gather_info(f"Enter the {to_ordinal(index + 1)} account's password:", str)
 
         answers = None
