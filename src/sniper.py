@@ -158,7 +158,7 @@ class GiftCodeAccount(Account):
 
 
 class Session:
-    def __init__(self, accounts: list[Account], target_name: str, offset: int, requests: int, timing_system: str, optimize_offset: bool = True) -> None:
+    def __init__(self, accounts: list[Account], target_name: str, offset: int, requests: int, timing_system: str, optimize_offset: bool) -> None:
         """
         A sniping session, where you attempt to claim a name to any of your accounts
 
