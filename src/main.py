@@ -9,7 +9,7 @@ import time
 
 # Print the logo
 build_json.print_logo()
-print(f"{error.LIGHT_BLUE}\nWelcome to Tango's runtime. You can issue a snipe using this program.")
+print(f"{error.BLUE}\nWelcome to Tango's runtime. You can issue a snipe using this program.")
 
 
 try:
@@ -20,7 +20,7 @@ except FileNotFoundError:
     if run_build_json:
         build_json.build_config()
     else:
-        print(f"{error.LIGHT_BLUE}Okay, but keep in mind you cannot continue without a configuration file. Exiting now.")
+        print(f"{error.BLUE}Okay, but keep in mind you cannot continue without a configuration file. Exiting now.")
         time.sleep(1)
         exit(1)
 
@@ -36,4 +36,4 @@ for account in configuration_json["accounts"]:
 
 sniping_session = sniper.Session(accounts, configuration_json["target"], configuration_json["offset"], configuration_json["requests"], configuration_json["timing"], configuration_json["optimize"])
 asyncio.run(sniping_session.run())
-input(f"{error.GRAY}\nSniping session ended. Press {error.LIGHT_BLUE}Enter{error.GRAY} to exit.")
+input(f"{error.GRAY}\nSniping session ended. Press {error.BLUE}Enter{error.GRAY} to exit.")

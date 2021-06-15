@@ -1,16 +1,23 @@
 import error
 
+import aiohttp
+import bs4
+
 import asyncio
+import warnings
 import datetime
 import json
-import aiohttp  # For asynchronous requests
-import bs4
 import time
 import platform
+
 
 # Compatibility with windows
 if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+
+# Make the program ignore warnings, such as some coroutines never being awaited
+warnings.simplefilter("ignore")
 
 
 async def teun_availability_time(username: str) -> float:
@@ -37,16 +44,31 @@ async def teun_availability_time(username: str) -> float:
 
 async def name_mc_availability_time(username: str) -> float:
     """
-    Sends a request to name mc and uses bs4 to scrape the time of availability of its html source
+    Sends a request to nameMC and gets the availability time off the HTML source code
 
     :param username: An available or "dropping" username
     :return: The amount of seconds until the specified name is available
     """
 
     async with aiohttp.ClientSession() as session:
+        # Send a request to nameMC and get HTML as a response. That is the source code of the page
         async with session.get(f"https://namemc.com/search?q={username}") as html_response:
             html = bs4.BeautifulSoup(await html_response.text(), "html.parser")
+
+            if html.find("title", text="Please Wait... | Cloudflare") is not None:
+                error.UnavailableTimerError("NameMC turned on CloudFlare")
+
+            # Attempts to find the availability time. If it fails, the username is either unavailable, or available
             availability_time = html.find("time", {"id": "availability-time"})["datetime"]
+
+            if availability_time is None:
+                # Despite the fact you could derive the availability of the account using the same HTML source, it's easier to just check the Mojang API
+                async with session.get(f"https://account.mojang.com/available/minecraft/{username}") as availability_response:
+                    if await availability_response.text() == "TAKEN":
+                        error.UsernameUnavailableError(await availability_response.text())
+
+                return 0
+
             unix_availability_time = (datetime.datetime.strptime(availability_time, "%Y-%m-%dT%H:%M:%S.000Z") - datetime.datetime(1970, 1, 1)).total_seconds()
 
             return unix_availability_time - time.time()
@@ -60,6 +82,7 @@ class Account:
         :param email: The accounts email
         :param password: The accounts password
         """
+
         self.email = email
         self.password = password
         self.session = None
@@ -69,6 +92,7 @@ class Account:
         """
         Authenticate this account, to access restricted parts of the Mojang API
         """
+
         async with aiohttp.ClientSession() as session:
             async with session.post("https://authserver.mojang.com/authenticate", headers={"Content-Type": "application/json"},
                                     json={"username": self.email, "password": self.password}) as authentication_response:
@@ -76,7 +100,7 @@ class Account:
                 if authentication_response.status != 200:
                     error.InvalidCredentialsError(await authentication_response.text())
 
-                print(f"{error.LIGHT_BLUE}Email and password confirmed, {self.email} exists.")
+                print(f"{error.BLUE}Email and password confirmed, {self.email} exists.")
 
                 access_token = (await authentication_response.json())['accessToken']
                 self.authorization_header = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json", "Accept": "application/json"}
@@ -89,7 +113,7 @@ class Account:
                             response_json = await question_response.json()
                             questions = {question["answer"]["id"]: question["question"]["question"] for question in response_json}
 
-                            print(f"{error.LIGHT_BLUE}In order to finish authenticating {self.email} you need to answer 3 security questions. Please do so.")
+                            print(f"{error.BLUE}In order to finish authenticating {self.email} you need to answer 3 security questions. Please do so.")
 
                             # Retrieve answers supplied by the user
                             answers = [{"id": key, "answer": input(f"\n{error.GRAY}{questions[key]}\n{error.DARK_GRAY}> ")} for key in questions]
@@ -106,17 +130,20 @@ class Account:
         :param target_name: A name you want to switch to
         :param index: The order of this snipe request
         """
+
         current_time = datetime.datetime.now()
-        print(f"{error.DARK_GRAY}{index}){error.GRAY} Trying to snipe {error.BLUE}{target_name}{error.GRAY} to {self.email} at {datetime.datetime.now()}.")
+        print(f"{error.DARK_GRAY}{index}){error.GRAY} Trying to snipe {error.BLUE}{target_name}{error.GRAY} to {self.email} at {current_time}.")
 
         # Send a request to change the account's name
         async with aiohttp.ClientSession() as session:
             async with session.put(f"https://api.minecraftservices.com/minecraft/profile/name/{target_name}", headers=self.authorization_header) as name_change_response:
+                result_time = datetime.datetime.now()
+
                 if name_change_response.status == 200:
                     self.got_name = True
-                    print(f"{error.DARK_GRAY}{index}){error.GRAY} Succeeded in sniping {error.BLUE}{target_name}{error.GRAY} to {self.email} at {datetime.datetime.now()}.")
+                    print(f"{error.DARK_GRAY}{index}){error.GRAY} Succeeded in sniping {error.BLUE}{target_name}{error.GRAY} to {self.email} at {result_time}.")
                 else:
-                    print(f"{error.DARK_GRAY}{index}){error.GRAY} Failed in sniping {error.RED}{target_name}{error.GRAY} to {self.email} at {datetime.datetime.now()}.")
+                    print(f"{error.DARK_GRAY}{index}){error.GRAY} Failed in sniping {error.RED}{target_name}{error.GRAY} to {self.email} at {result_time}.")
 
             await asyncio.sleep(0)  # Pass control
 
@@ -141,16 +168,19 @@ class GiftCodeAccount(Account):
         :param target_name: A name you want to switch to
         :param index: The order of this snipe request
         """
+
         current_time = datetime.datetime.now()
-        print(f"{error.DARK_GRAY}{index}){error.GRAY} Trying to snipe {error.BLUE}{target_name}{error.GRAY} to {self.email} at {datetime.datetime.now()}.")
+        print(f"{error.DARK_GRAY}{index}){error.GRAY} Sniping {error.BLUE}{target_name}{error.GRAY} to {self.email} at {current_time}.")
 
         async with self.session.post(f"https://api.minecraftservices.com/minecraft/profile", headers=self.authorization_header,
                                      json={"profileName": target_name}) as claim_response:
+            result_time = datetime.datetime.now()
+
             if claim_response.status == 200:
                 self.got_name = True
-                print(f"{error.BLUE}{index}){error.GRAY} Succeeded in sniping {error.BLUE}{target_name}{error.GRAY} to {self.email} at {datetime.datetime.now()}.")
+                print(f"{error.BLUE}{index}){error.GRAY} Sniped {error.BLUE}{target_name}{error.GRAY} to {self.email} at {result_time}.")
             else:
-                print(f"{error.RED}{index}){error.GRAY} Failed in sniping {error.RED}{target_name}{error.GRAY} to {self.email} at {datetime.datetime.now()}.")
+                print(f"{error.RED}{index}){error.GRAY} Didn't snipe {error.RED}{target_name}{error.GRAY} to {self.email} at {result_time}.")
 
         await asyncio.sleep(0)  # Pass control
 
@@ -169,6 +199,7 @@ class Session:
         :param timing_system: The way in which you want to calculate availability time for the name
         :param target_name: A name you want to snipe
         """
+
         self.accounts = accounts
         self.target_name = target_name
         self.offset = offset
@@ -180,6 +211,7 @@ class Session:
         """
         Change the name of this account to the target name when possible
         """
+
         async with aiohttp.ClientSession() as session:
             requests = []
 
@@ -188,15 +220,22 @@ class Session:
                 requests.extend([account.send_snipe_request(self.target_name, index + 1) for index in range(self.requests)])
 
             availability_time = await teun_availability_time(self.target_name) if self.timing_system == "teun" else await name_mc_availability_time(self.target_name)
+
+            # Calculate some timing data
             sleep_time = max(availability_time - self.offset / 1000 - 0.5, 0)  # The offset is in milliseconds, so we convert it to seconds
             current_time = datetime.datetime.now()
             start_time = current_time + datetime.timedelta(seconds=sleep_time)
 
+            # Display that the session began
             print(f"{error.GRAY}\nSniping session began at {error.BLUE}{current_time.strftime('%Y/%m/%d %H:%M:%S')}{error.GRAY}.")
             print(f"{error.GRAY}Attempts to snipe {error.BLUE}{self.target_name}{error.GRAY} will begin at {error.BLUE}{start_time.strftime('%Y/%m/%d %H:%M:%S')}{error.GRAY}.")
+
             await asyncio.sleep(sleep_time)
+
+            # Display that sniping start
             print(f"{error.GRAY}Sniping started at {error.BLUE}{datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S.%M')}{error.GRAY}. "
                   f"The name is available in {error.BLUE}{start_time.strftime('%Y/%m/%d %H:%M:%S.%M')}{error.GRAY}\n")
+
             request_times = await asyncio.gather(*requests)
 
             # Generally, a good scenario is for your last request to occur at the names availability time + 0.1 seconds. We attempt to make the offset fall in that range

@@ -1,5 +1,7 @@
 import error
 
+import stdiomask
+
 import json
 import typing
 
@@ -11,11 +13,12 @@ def choice(to_convert: str) -> bool:
     :param to_convert: A value to convert into a boolean
     :return: A boolean, based on the original value
     """
+    to_convert = to_convert.lower()
 
-    if to_convert not in ("Yes", "No"):
+    if to_convert not in ("yes", "no", "y", "n"):
         raise ValueError(f"invalid literal for choice(): '{to_convert}'")
 
-    return to_convert == "Yes"
+    return to_convert in ("yes", "y")
 
 
 def gather_info(prompt: str, requested_type: typing.Callable) -> any:
@@ -24,10 +27,26 @@ def gather_info(prompt: str, requested_type: typing.Callable) -> any:
 
     :param prompt: A prompt the users sees. It details what is to be inputted
     :param requested_type: A type you want the response from the user to have
-    :return: A response from the user
+    :return: A response from the user, in the type specified
     """
 
     response = input(f"{error.GRAY}{prompt}{error.BLUE}\n> ")
+
+    try:
+        return requested_type(response)
+    except ValueError as exception:
+        error.InputTypeError(f"Input is not of type {requested_type.__name__}", exception.__str__())
+
+
+def gather_secret(prompt: str, requested_type: typing.Callable) -> str:
+    """
+    Get an input from the user that is hidden, like entering a password.
+
+    :param requested_type: A prompt the users sees. It details what is to be inputted
+    :type prompt: objectA type you want the response from the user to have
+    :return: A response from the user, in the type specified
+    """
+    response = stdiomask.getpass(f"{error.GRAY}{prompt}{error.BLUE}\n> ")
 
     try:
         return requested_type(response)
@@ -71,25 +90,20 @@ def build_config() -> None:
     """
     Build the configuration file so sessions can be performed
     """
-    print(f"""
-{error.LIGHT_BLUE}Welcome to the json builder. This program will create a configuration file for you.
-
-Note that:{error.GRAY}
-
-{error.LIGHT_BLUE}*{error.GRAY} Your sniping offset is gradually changed every snipe to better adapt to your computer.
-Using this program will overwrite the current offset value.
-{error.LIGHT_BLUE}*{error.GRAY} Make sure no one is watching.
-You are about to enter {error.LIGHT_RED}sensitive{error.GRAY} information.
-{error.LIGHT_BLUE}*{error.GRAY} Some configuration settings are not filled out here, and are set to default values.
-You can manually create or modify your configuration file to prevent that.
-""")
+    print(f"\n{error.BLUE}Welcome to the json builder. This program will create a configuration file for you.\n\n"
+          f"Note that:{error.GRAY}\n\n"
+          f"{error.BLUE}*{error.GRAY} Your sniping offset is gradually changed every snipe to better adapt to your computer.\n"
+          "Using this program will overwrite the current offset value.\n\n"
+          f"{error.BLUE}*{error.GRAY} Some configuration settings are not filled out here, and are set to default values.\n"
+          "You can manually create or modify your configuration file to prevent that.\n"
+          "")
 
     account_count = gather_info("How many accounts would you like to use?", int)
     accounts = []
 
     for index in range(account_count):
         email = gather_info(f"\nEnter the {to_ordinal(index + 1)} account's email:", str)
-        password = gather_info(f"Enter the {to_ordinal(index + 1)} account's password:", str)
+        password = gather_secret(f"Enter the {to_ordinal(index + 1)} account's password:", str)
 
         answers = None
         use_security_questions = gather_info(f"Does the {to_ordinal(index + 1)} account have security questions? [Yes/No]", choice)
