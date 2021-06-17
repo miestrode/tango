@@ -84,7 +84,7 @@ It is advised to have a configuration file before running `main.py`, although yo
 View the [issues and pull requests](https://github.com/Miestrode/tango/issues) for a list of issues, features and bug reports.
 
 ## Contributing
-You can help this sniper grow. Just follow theres four steps:
+You can help this sniper grow. Just follow these steps:
 
 1. Fork the Project
 2. Create your Feature Branch
