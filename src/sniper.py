@@ -6,15 +6,13 @@ import bs4
 import asyncio
 import warnings
 import datetime
-import json
+import toml
 import time
 import platform
-
 
 # Compatibility with windows
 if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
 
 # Make the program ignore warnings, such as some coroutines never being awaited
 warnings.simplefilter("ignore")
@@ -29,9 +27,13 @@ async def teun_availability_time(username: str) -> float:
     """
 
     async with aiohttp.ClientSession() as session:
+        print(f"\nGetting availability time for {error.BLUE}{username}{error.GRAY} from Teun's API.")
+
         # Teun's API can get name drop times, as this is impossible since Mojang disabled the use of the "timestamp" parameter since 2020
         async with session.get(f"https://mojang-api.teun.lol/droptime/{username}") as drop_time_response:
             if drop_time_response.status != 200:
+                print(f"Checking if {error.BLUE}{username}{error.GRAY} is available or unavailable.")
+
                 # Unfortunately, the API doesn't distinguish between available and unavailable names. So we have to send a second call to the Mojang API
                 async with session.get(f"https://account.mojang.com/available/minecraft/{username}") as availability_response:
                     if await availability_response.text() == "TAKEN":
@@ -51,21 +53,23 @@ async def name_mc_availability_time(username: str) -> float:
     """
 
     async with aiohttp.ClientSession() as session:
+        print(f"\nGetting availability time for {error.BLUE}{username}{error.GRAY} from nameMC.")
+
         # Send a request to nameMC and get HTML as a response. That is the source code of the page
         async with session.get(f"https://namemc.com/search?q={username}") as html_response:
             html = bs4.BeautifulSoup(await html_response.text(), "html.parser")
 
-            if html.find("title", text="Please Wait... | Cloudflare") is not None:
+            if html.find("title", text="Please Wait... | Cloudflare"):
                 error.UnavailableTimerError("NameMC turned on CloudFlare")
 
             # Attempts to find the availability time. If it fails, the username is either unavailable, or available
             availability_time = html.find("time", {"id": "availability-time"})["datetime"]
 
-            if availability_time is None:
-                # Despite the fact you could derive the availability of the account using the same HTML source, it's easier to just check the Mojang API
-                async with session.get(f"https://account.mojang.com/available/minecraft/{username}") as availability_response:
-                    if await availability_response.text() == "TAKEN":
-                        error.UsernameUnavailableError(await availability_response.text())
+            if not availability_time:
+                print(f"Checking if {error.BLUE}{username}{error.GRAY} is available or unavailable.")
+
+                if not html.find("div", text="Available"):
+                    error.UsernameUnavailableError("TAKEN")
 
                 return 0
 
@@ -75,23 +79,27 @@ async def name_mc_availability_time(username: str) -> float:
 
 
 class Account:
-    def __init__(self, email: str, password: str) -> None:
+    def __init__(self, email: str, password: str, answers: list[str]) -> None:
         """
         Storage for a basic Minecraft account for sniping
 
         :param email: The accounts email
         :param password: The accounts password
+        :param answers: The answers to the security questions if needed
         """
 
         self.email = email
         self.password = password
+        self.security_answers = answers
         self.session = None
         self.authorization_header = None
 
-    async def __authenticate(self) -> None:
+    async def authenticate(self) -> None:
         """
         Authenticate this account, to access restricted parts of the Mojang API
         """
+
+        print(f"\nAuthenticating {error.BLUE}{self.email}{error.GRAY}.")
 
         async with aiohttp.ClientSession() as session:
             async with session.post("https://authserver.mojang.com/authenticate", headers={"Content-Type": "application/json"},
@@ -100,28 +108,27 @@ class Account:
                 if authentication_response.status != 200:
                     error.InvalidCredentialsError(await authentication_response.text())
 
-                print(f"{error.BLUE}Email and password confirmed, {self.email} exists.")
+                print(f"{error.BLUE}{self.email}{error.GRAY} exists.")
 
-                access_token = (await authentication_response.json())['accessToken']
+                access_token = (await authentication_response.json())["accessToken"]
                 self.authorization_header = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json", "Accept": "application/json"}
 
-                # Check if you need security questions
-                async with session.get("https://api.mojang.com/user/security/location", headers=self.authorization_header) as security_response:
-                    if security_response.status != 204:
-                        # Get the security questions
-                        async with session.get("https://api.mojang.com/user/security/challenges", headers=self.authorization_header) as question_response:
-                            response_json = await question_response.json()
-                            questions = {question["answer"]["id"]: question["question"]["question"] for question in response_json}
+                # Save an API call by getting the security questions. The API returns "[]" when no security questions are present
+                async with session.get("https://api.mojang.com/user/security/challenges", headers=self.authorization_header) as question_response:
+                    response_json = await question_response.json()
 
-                            print(f"{error.BLUE}In order to finish authenticating {self.email} you need to answer 3 security questions. Please do so.")
+                    if not response_json:
+                        questions = [question["answer"]["id"] for question in response_json]
 
-                            # Retrieve answers supplied by the user
-                            answers = [{"id": key, "answer": input(f"\n{error.GRAY}{questions[key]}\n{error.DARK_GRAY}> ")} for key in questions]
+                        print(f"{error.BLUE}{self.email}{error.GRAY} has security questions, sending answers.")
 
-                            # Send the answers back
-                            async with session.post("https://api.mojang.com/user/security/location", headers=self.authorization_header, json=answers) as answer_response:
-                                if answer_response.status != 204:
-                                    error.SecurityAnswerError(await answer_response.text())
+                        # Retrieve answers as supplied by the user
+                        answers = [{"id": key, "answer": self.security_answers[index]} for key, index in enumerate(questions)]
+
+                        # Send the answers back
+                        async with session.post("https://api.mojang.com/user/security/location", headers=self.authorization_header, json=answers) as answer_response:
+                            if answer_response.status != 204:
+                                error.SecurityAnswerError(await answer_response.text())
 
     async def send_snipe_request(self, target_name: str, index: int) -> datetime.datetime:
         """
@@ -132,18 +139,18 @@ class Account:
         """
 
         current_time = datetime.datetime.now()
-        print(f"{error.DARK_GRAY}{index}){error.GRAY} Trying to snipe {error.BLUE}{target_name}{error.GRAY} to {self.email} at {current_time}.")
+        print(f"{error.DARK_GRAY}{index}){error.GRAY} Attempting to snipe {error.BLUE}{target_name}{error.GRAY} to {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{current_time.strftime('%H:%M:%S.%f')}{error.GRAY}.")
 
         # Send a request to change the account's name
         async with aiohttp.ClientSession() as session:
             async with session.put(f"https://api.minecraftservices.com/minecraft/profile/name/{target_name}", headers=self.authorization_header) as name_change_response:
-                result_time = datetime.datetime.now()
+                result_time = datetime.datetime.now().strftime("%H:%M:%S.%f")
 
                 if name_change_response.status == 200:
                     self.got_name = True
-                    print(f"{error.DARK_GRAY}{index}){error.GRAY} Succeeded in sniping {error.BLUE}{target_name}{error.GRAY} to {self.email} at {result_time}.")
+                    print(f"{error.BLUE}{index}){error.GRAY} Succeeded in sniping {error.BLUE}{target_name}{error.GRAY} to {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{result_time}{error.GRAY}.")
                 else:
-                    print(f"{error.DARK_GRAY}{index}){error.GRAY} Failed in sniping {error.RED}{target_name}{error.GRAY} to {self.email} at {result_time}.")
+                    print(f"{error.RED}{index}){error.GRAY} Failed in sniping {error.BLUE}{target_name}{error.GRAY} to {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{result_time}{error.GRAY}.")
 
             await asyncio.sleep(0)  # Pass control
 
@@ -151,7 +158,7 @@ class Account:
 
 
 class GiftCodeAccount(Account):
-    def __init__(self, email: str, password: str) -> None:
+    def __init__(self, email: str, password: str, answers: list[str]) -> None:
         """
         Storage for a basic Minecraft account with a gift code for sniping
 
@@ -159,7 +166,7 @@ class GiftCodeAccount(Account):
         :param password: The accounts password
         """
 
-        super().__init__(email, password)
+        super().__init__(email, password, answers)
 
     async def send_snipe_request(self, target_name: str, index: int) -> datetime.datetime:
         """
@@ -170,17 +177,17 @@ class GiftCodeAccount(Account):
         """
 
         current_time = datetime.datetime.now()
-        print(f"{error.DARK_GRAY}{index}){error.GRAY} Sniping {error.BLUE}{target_name}{error.GRAY} to {self.email} at {current_time}.")
+        print(f"{error.DARK_GRAY}{index}){error.GRAY} Attempting to create {error.BLUE}{target_name}{error.GRAY} for {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{current_time.strftime('%H:%M:%S.%f')}{error.GRAY}.")
 
         async with self.session.post(f"https://api.minecraftservices.com/minecraft/profile", headers=self.authorization_header,
                                      json={"profileName": target_name}) as claim_response:
-            result_time = datetime.datetime.now()
+            result_time = datetime.datetime.now().strftime("%H:%M:%S.%f")
 
             if claim_response.status == 200:
                 self.got_name = True
-                print(f"{error.BLUE}{index}){error.GRAY} Sniped {error.BLUE}{target_name}{error.GRAY} to {self.email} at {result_time}.")
+                print(f"{error.BLUE}{index}){error.GRAY} Succeeded in creating {error.BLUE}{target_name}{error.GRAY} for {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{result_time}{error.GRAY}.")
             else:
-                print(f"{error.RED}{index}){error.GRAY} Didn't snipe {error.RED}{target_name}{error.GRAY} to {self.email} at {result_time}.")
+                print(f"{error.RED}{index}){error.GRAY} Failed in creating {error.BLUE}{target_name}{error.GRAY} for {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{result_time}{error.GRAY}.")
 
         await asyncio.sleep(0)  # Pass control
 
@@ -214,27 +221,32 @@ class Session:
 
         async with aiohttp.ClientSession() as session:
             requests = []
+            print(f"\n{error.GRAY}Preparing and authenticating accounts for sniping.")
 
             for account in self.accounts:
                 account.session = session  # Preload session object
+                await account.authenticate()  # Authenticate the account so we can use it for other things
+
                 requests.extend([account.send_snipe_request(self.target_name, index + 1) for index in range(self.requests)])
 
+            # Get the availability time of the name
             availability_time = await teun_availability_time(self.target_name) if self.timing_system == "teun" else await name_mc_availability_time(self.target_name)
 
             # Calculate some timing data
-            sleep_time = max(availability_time - self.offset / 1000 - 0.5, 0)  # The offset is in milliseconds, so we convert it to seconds
+            print(f"{error.GRAY}Calculating timing data for {error.BLUE}{self.target_name}{error.GRAY}.\n")
+
+            sleep_time = max(availability_time - self.offset / 1000, 0)  # The offset is in milliseconds, so we convert it to seconds
             current_time = datetime.datetime.now()
             start_time = current_time + datetime.timedelta(seconds=sleep_time)
 
             # Display that the session began
-            print(f"{error.GRAY}\nSniping session began at {error.BLUE}{current_time.strftime('%Y/%m/%d %H:%M:%S')}{error.GRAY}.")
-            print(f"{error.GRAY}Attempts to snipe {error.BLUE}{self.target_name}{error.GRAY} will begin at {error.BLUE}{start_time.strftime('%Y/%m/%d %H:%M:%S')}{error.GRAY}.")
+            print(f"{error.GRAY}Sniping session ready at {error.BLUE}{current_time.strftime('%A, %H:%M:%S.%f')}{error.GRAY}. Attempts to snipe {error.BLUE}{self.target_name}{error.GRAY} will begin at {error.BLUE}{start_time.strftime('%A, %H:%M:%S.%f')}{error.GRAY}.")
 
+            # Wait out the time until sniping should begin
             await asyncio.sleep(sleep_time)
 
             # Display that sniping start
-            print(f"{error.GRAY}Sniping started at {error.BLUE}{datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S.%M')}{error.GRAY}. "
-                  f"The name is available in {error.BLUE}{start_time.strftime('%Y/%m/%d %H:%M:%S.%M')}{error.GRAY}\n")
+            print(f"{error.GRAY}Now sniping {error.BLUE}{self.target_name}{error.GRAY} at {error.BLUE}{datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S.%M')}{error.GRAY}.\n")
 
             request_times = await asyncio.gather(*requests)
 
@@ -242,10 +254,10 @@ class Session:
             new_offset = max(self.offset + (request_times[-1] - (start_time + datetime.timedelta(milliseconds=100))).microseconds / 1000, 0)
 
             # Directly change the offset in the configuration file
-            with open("../src/config.json", 'r') as file:
-                configuration_json = json.loads(file.read())
+            with open("config.toml", 'r') as file:
+                configuration_json = toml.loads(file.read())
 
             if configuration_json["optimize"]:
-                with open("../src/config.json", 'w') as file:
-                    configuration_json["offset"] = new_offset
-                    json.dump(configuration_json, file, indent=4)
+                with open("config.toml", 'w') as file:
+                    configuration_json["timing"]["offset"] = new_offset
+                    toml.dump(configuration_json, file)
