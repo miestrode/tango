@@ -76,7 +76,7 @@ You can start using Tango by following these steps:
 * Open the `src` folder
 * Run `main.py`
 
-`build_json.py` Creates your configuration file for the first time, but it can be used again.
+`build_config.py` Creates your configuration file for the first time, but it can be used again.
 `main.py` Uses `sniper.py` to run a sniping session with the data from your configuration file.
 It is advised to have a configuration file before running `main.py`, although you don't have to.
 
