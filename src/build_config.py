@@ -1,9 +1,37 @@
+import asyncio
+import time
+import typing
+
+import aiohttp
+import stdiomask
+import toml
+
 import error
 
-import stdiomask
 
-import toml
-import typing
+async def get_latency(client: aiohttp.ClientSession) -> float:
+    """
+    Get the latency to the Minecraft name changing API, to generate a good sniping offset
+
+    :param client: The client used to request the website
+    :return: The latency of a request to the website
+    """
+    start = time.time()
+
+    await client.head("https://api.minecraftservices.com/minecraft/profile/name/")
+
+    return time.time() - start
+
+
+async def get_average_latency() -> float:
+    """
+    Get the average latency to the Minecraft name changing API, used as the offset for the sniper, in default settings
+
+    :return: The average latency of the Minecraft name changing API, scaled up to be used as an offset
+    """
+
+    async with aiohttp.ClientSession() as client:
+        return (sum(await asyncio.gather(*[get_latency(client) for _ in range(5)])) / 5) * 1000
 
 
 def choice(to_convert: str) -> bool:
@@ -115,14 +143,28 @@ def build_config() -> None:
         if use_security_questions:
             answers = [gather_info(f"Enter the {to_ordinal(index + 1)} account's {to_ordinal(rank + 1)} security answer:", str) for rank in range(2)]
 
-        has_profile = gather_info(f"Does the {account_index} account have a profile? (If not, you need to claim a gift code on this account before proceeding) [Yes/No]", choice)
+        has_profile = gather_info(f"Does the {account_index} account have a profile? (If not, you need to claim a gift code on this account before proceeding) [Yes/No]",
+                                  choice)
 
         accounts.append({"email": email, "password": password, "answers": answers, "exists": has_profile})
 
     target_name = gather_info("\nWhat name you want to snipe?", str)
 
     with open("config.toml", 'w') as file:
-        toml.dump({"accounts": accounts, "timing": {"offset": 400, "system": "teun", "optimize": True}, "request": {"count": 3, "target": target_name}}, file)
+        toml.dump(
+            {
+                "accounts": accounts,
+                "timing": {
+                    "offset": asyncio.run(get_average_latency()) - 10,
+                    "system": "macho",
+                    "optimize": True
+                },
+                "request": {
+                    "count": 3,
+                    "target": target_name
+                }
+            }, file
+        )
 
 
 if __name__ == "__main__":

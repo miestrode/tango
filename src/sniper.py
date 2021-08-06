@@ -18,19 +18,19 @@ if platform.system() == "Windows":
 warnings.simplefilter("ignore")
 
 
-async def teun_availability_time(username: str) -> float:
+async def macho_availability_time(username: str) -> float:
     """
-    Sends a request to Teun's API and returns the time of availability of that name
+    Sends a request to CoolKidMacho's API and returns the time of availability of that name
 
     :param username: An available or "dropping" username
     :return: The amount of seconds until the specified name is available
     """
 
     async with aiohttp.ClientSession() as session:
-        print(f"\nGetting availability time for {error.BLUE}{username}{error.GRAY} from Teun's API.")
+        print(f"\nGetting availability time for {error.BLUE}{username}{error.GRAY} from Macho's API.")
 
-        # Teun's API can get name drop times, as this is impossible since Mojang disabled the use of the "timestamp" parameter since 2020
-        async with session.get(f"https://mojang-api.teun.lol/droptime/{username}") as drop_time_response:
+        # Macho's API can get name drop times, as this is impossible since Mojang disabled the use of the "timestamp" parameter since 2020
+        async with session.get(f"http://api.coolkidmacho.com/droptime/{username}") as drop_time_response:
             if drop_time_response.status != 200:
                 print(f"Checking if {error.BLUE}{username}{error.GRAY} is available or unavailable.")
 
@@ -139,7 +139,8 @@ class Account:
         """
 
         current_time = datetime.datetime.now()
-        print(f"{error.DARK_GRAY}{index}){error.GRAY} Attempting to snipe {error.BLUE}{target_name}{error.GRAY} to {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{current_time.strftime('%H:%M:%S.%f')}{error.GRAY}.")
+        print(f"{error.DARK_GRAY}{index}){error.GRAY} Attempting to snipe {error.BLUE}{target_name}{error.GRAY} to {error.BLUE}{self.email}{error.GRAY} at "
+              f"{error.BLUE}{current_time.strftime('%H:%M:%S.%f')}{error.GRAY}.")
 
         # Send a request to change the account's name
         async with aiohttp.ClientSession() as session:
@@ -147,10 +148,11 @@ class Account:
                 result_time = datetime.datetime.now().strftime("%H:%M:%S.%f")
 
                 if name_change_response.status == 200:
-                    self.got_name = True
-                    print(f"{error.BLUE}{index}){error.GRAY} Succeeded in sniping {error.BLUE}{target_name}{error.GRAY} to {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{result_time}{error.GRAY}.")
+                    print(f"{error.BLUE}{index}){error.GRAY} Succeeded in sniping {error.BLUE}{target_name}{error.GRAY} to {error.BLUE}{self.email}{error.GRAY} at "
+                          f"{error.BLUE}{result_time}{error.GRAY}.")
                 else:
-                    print(f"{error.RED}{index}){error.GRAY} Failed in sniping {error.BLUE}{target_name}{error.GRAY} to {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{result_time}{error.GRAY}.")
+                    print(f"{error.RED}{index}){error.GRAY} Failed in sniping {error.BLUE}{target_name}{error.GRAY} to {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}"
+                          f"{result_time}{error.GRAY}.")
 
             await asyncio.sleep(0)  # Pass control
 
@@ -177,17 +179,19 @@ class GiftCodeAccount(Account):
         """
 
         current_time = datetime.datetime.now()
-        print(f"{error.DARK_GRAY}{index}){error.GRAY} Attempting to create {error.BLUE}{target_name}{error.GRAY} for {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{current_time.strftime('%H:%M:%S.%f')}{error.GRAY}.")
+        print(f"{error.DARK_GRAY}{index}){error.GRAY} Attempting to create {error.BLUE}{target_name}{error.GRAY} for {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}"
+              f"{current_time.strftime('%H:%M:%S.%f')}{error.GRAY}.")
 
         async with self.session.post(f"https://api.minecraftservices.com/minecraft/profile", headers=self.authorization_header,
                                      json={"profileName": target_name}) as claim_response:
             result_time = datetime.datetime.now().strftime("%H:%M:%S.%f")
 
             if claim_response.status == 200:
-                self.got_name = True
-                print(f"{error.BLUE}{index}){error.GRAY} Succeeded in creating {error.BLUE}{target_name}{error.GRAY} for {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{result_time}{error.GRAY}.")
+                print(f"{error.BLUE}{index}){error.GRAY} Succeeded in creating {error.BLUE}{target_name}{error.GRAY} for {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}"
+                      f"{result_time}{error.GRAY}.")
             else:
-                print(f"{error.RED}{index}){error.GRAY} Failed in creating {error.BLUE}{target_name}{error.GRAY} for {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}{result_time}{error.GRAY}.")
+                print(f"{error.RED}{index}){error.GRAY} Failed in creating {error.BLUE}{target_name}{error.GRAY} for {error.BLUE}{self.email}{error.GRAY} at {error.BLUE}"
+                      f"{result_time}{error.GRAY}.")
 
         await asyncio.sleep(0)  # Pass control
 
@@ -230,7 +234,7 @@ class Session:
                 requests.extend([account.send_snipe_request(self.target_name, index + 1) for index in range(self.requests)])
 
             # Get the availability time of the name
-            availability_time = await teun_availability_time(self.target_name) if self.timing_system == "teun" else await name_mc_availability_time(self.target_name)
+            availability_time = await macho_availability_time(self.target_name) if self.timing_system == "macho" else await name_mc_availability_time(self.target_name)
 
             # Calculate some timing data
             print(f"{error.GRAY}Calculating timing data for {error.BLUE}{self.target_name}{error.GRAY}.\n")
@@ -240,13 +244,15 @@ class Session:
             start_time = current_time + datetime.timedelta(seconds=sleep_time)
 
             # Display that the session began
-            print(f"{error.GRAY}Sniping session ready at {error.BLUE}{current_time.strftime('%A, %H:%M:%S.%f')}{error.GRAY}. Attempts to snipe {error.BLUE}{self.target_name}{error.GRAY} will begin at {error.BLUE}{start_time.strftime('%A, %H:%M:%S.%f')}{error.GRAY}.")
+            print(f"{error.GRAY}Sniping session ready at {error.BLUE}{current_time.strftime('%A, %H:%M:%S.%f')}{error.GRAY}. Attempts to snipe {error.BLUE}{self.target_name}"
+                  f"{error.GRAY} will begin at {error.BLUE}{start_time.strftime('%A, %H:%M:%S.%f')}{error.GRAY}.")
 
             # Wait out the time until sniping should begin
             await asyncio.sleep(sleep_time)
 
             # Display that sniping start
-            print(f"{error.GRAY}Now sniping {error.BLUE}{self.target_name}{error.GRAY} at {error.BLUE}{datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S.%M')}{error.GRAY}.\n")
+            print(f"{error.GRAY}Now sniping {error.BLUE}{self.target_name}{error.GRAY} at {error.BLUE}{datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S.%M')}"
+                  f"{error.GRAY}.\n")
 
             request_times = await asyncio.gather(*requests)
 
@@ -257,7 +263,7 @@ class Session:
             with open("config.toml", 'r') as file:
                 configuration_json = toml.loads(file.read())
 
-            if configuration_json["optimize"]:
+            if configuration_json["timing"]["optimize"]:
                 with open("config.toml", 'w') as file:
                     configuration_json["timing"]["offset"] = new_offset
                     toml.dump(configuration_json, file)
